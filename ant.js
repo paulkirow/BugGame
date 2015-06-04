@@ -1,4 +1,4 @@
-﻿var 
+﻿var
     /** Constants **/
     WIDTH = 400,
     HEIGHT = 600,
@@ -30,9 +30,40 @@
     clickstate,
     gamestate,
     score,
+    highscore,
     timer,
-    food,
-    ant
+    foodlist,
+    food = {
+        x: null,
+        y: null,
+        eaten: null,
+        init: function(x, y) {
+            this.x = x;
+            this.y = y;
+            this.eaten = false;
+        },
+        eat: function() {
+            this.eaten = true;
+        }
+    },
+    ant;
+
+function setFood() {
+    
+}
+
+function init() {
+    score = 0;
+    // retrive high score
+    if (Document.localstorage) {
+        highscore = parseInt(localStorage["highscore"]||'0', 10);
+    } else {
+        // local storage unavailable
+        highscore = 0;
+    }
+}
+
+function play() { }
 
 function main() {
     // Create the canvas element
@@ -43,6 +74,7 @@ function main() {
     // add the canvas to the body of the html
     Document.body.appendChild(canvas);
 
+    // tracks the mouse activity
     Document.addEventListener("mousedown", function(evt) {
         clickstate["X"] = evt.clientX;
         clickstate["Y"] = evt.clientX;
@@ -52,4 +84,9 @@ function main() {
         delete clickstate["X"];
         delete clickstate["Y"];
     });
+
+    // initialize the game
+    init();
+    // start the game
+    play();
 }
