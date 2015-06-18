@@ -8,7 +8,7 @@ BUG_WIDTH = 10,
 BUG_HIGHT = 40,
 X_SPAWN_MIN = 10,
 X_SPAWN_MAX = 390,
-Y_SPAWN_MIN = 100,
+Y_SPAWN_MIN = 100,	
 Y_SPAWN_MAX = 500,
 SPAWN_TIME_MIN = 1,
 SPAWN_TIME_MAX = 3,
@@ -113,6 +113,15 @@ function ifclicked(event) {
 
     x -= canvas.offsetLeft;
     y -= canvas.offsetTop;
+	
+	
+	if ( x >= 170 && x <= 180 && y >= 5 && y <= 15 ){
+		gamestop=true;
+	}
+	
+	
+	
+	
 	for ( var i = 0; i < antpos.length; i+=2){
 		var distancesquared = Math.sqrt(Math.pow((x - antpos[i]), 2) + Math.pow((y - antpos[i+1]), 2));
 		if (distancesquared <= 30) {
@@ -124,19 +133,35 @@ function ifclicked(event) {
 }
 
 function draw() {
+	
 	ctx.beginPath();
 	ctx.fillStyle = "black";
+	ctx.fillText("Score: ", 280, 30);
     ctx.fillText(score, 350, 30);
+	
+	ctx.beginPath();
+	ctx.fillStyle = "black";
+	ctx.fillText(TIMER_START, 50, 30);
+	
+	ctx.beginPath();
+	ctx.rect(170, 15, 5, 15);
+	ctx.rect(180, 15, 5, 15);
+	ctx.fillStyle = 'black';
+    ctx.fill();
 	
 	ctx.beginPath();
     ctx.rect(0, 0, WIDTH, 40);
     ctx.fillStyle = 'white';
     ctx.fill();
+	
 	ctx.beginPath();
     ctx.moveTo(0, 40);
     ctx.lineTo(WIDTH, 40);
     ctx.stroke();
+	
+	
     updateFood();
+	
     for (var c = 0; c < antpos.length; c += 2) {
         updateAnts(0.5, 'ant.jpg', c);
     }
@@ -265,6 +290,10 @@ function newant() {
     antpos.push(0);
     antcount++;
 }
+function settimer(){
+	
+	TIMER_START--;
+}
 
 /*This is a time-based approach to animation
 * Found here: http://buildnewgames.com/dom-sprites/
@@ -295,6 +324,7 @@ function update() {
     }
     lastUpdateTime = Date.now();
 }
+var timer = setInterval(settimer, 1000);
 var anttime = setInterval(newant,ran(1,3)*1000);
 //clearInterval(t);
 var fps = setTimeout(update, 1000 / 60);
