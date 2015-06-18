@@ -20,7 +20,7 @@ RED_SCORE = 3,
 RED_PROBABILITY = 0.3,
 ORANGE_SPEED = 1,
 ORANGE_SCORE = 1,
-ORANGE_PROBABILITY = 0.5,
+ORANGE_PROBABILITY = 0.4,
 FOOD_COUNT = 5,
 LEVEL1_BUFF = 1.0,
 LEVEL2_BUFF = 0.75,
@@ -80,8 +80,6 @@ function onload() {
     }
     fooditems = ["food1", "food2", "food3", "food4", "food5"];
 }
-//draw the objects on the cavas and draw everytime draw() is called.
-//ref http://miloq.blogspot.ca/
 
 function ifclicked(event) {
 
@@ -104,29 +102,40 @@ function ifclicked(event) {
     }
 }
 
+//draw the objects on the cavas and draw everytime draw() is called.
+//ref http://miloq.blogspot.ca/
 function draw() {
 
     updateFood();
-    for (var c = 0; c < antpos.length; c += 2) {
-        updateAnts(0.5, 'ant.jpg', c);
+    for (var c = 0; c < antpos.length; c += 3) {
+        if (antpos[c+2] == 1)
+        {
+            updateAnts(ORANGE_SPEED, 'ant.jpg', c);
+        }
+        else if (antpos[c+2] == 2)
+        {
+            updateAnts(RED_SPEED, 'ant.jpg', c);
+        }
+        else if (antpos[c + 2] == 3) {
+            updateAnts(BLACK_SPEED, 'ant.jpg', c);
+        }
     }
-    setscore();
 }
 
-function updateAnts(speed, imgPath, c) {
+function updateAnts(speed, imgPath, index) {
     // Draw the ant image
     var img = new Image();
     img.src = imgPath;
     img.width = BUG_WIDTH;
     img.height = BUG_HIGHT;
-    ctx.drawImage(img, antpos[c], antpos[c + 1]);
+    ctx.drawImage(img, antpos[index], antpos[index + 1]);
 
     // Find the closest food to the ant
     var closestFoodIndex;
     var closestFoodDist = -1
     var dist;
     for (var i = 0; i < foodpos.length; i += 2) {
-        dist = getDistance(antpos[c], antpos[c + 1], foodpos[i], foodpos[i + 1]);
+        dist = getDistance(antpos[index], antpos[index + 1], foodpos[i], foodpos[i + 1]);
         if (closestFoodDist == -1 || closestFoodDist > dist) {
             closestFoodDist = dist;
             closestFoodIndex = i;
@@ -135,31 +144,26 @@ function updateAnts(speed, imgPath, c) {
 
     // Move ant towards the food only if it has a target
     if (closestFoodIndex !== undefined) {
-        if (foodpos[closestFoodIndex] > antpos[c]) {
-            antpos[c] += speed;
+        if (foodpos[closestFoodIndex] > antpos[index]) {
+            antpos[index] += speed;
         } else {
-            antpos[c] -= speed;
+            antpos[index] -= speed;
         }
-        if (foodpos[closestFoodIndex + 1] > antpos[c + 1]) {
-            antpos[c + 1] += speed;
+        if (foodpos[closestFoodIndex + 1] > antpos[index + 1]) {
+            antpos[index + 1] += speed;
         } else {
-            antpos[c + 1] -= speed;
+            antpos[index + 1] -= speed;
         }
     }
+    /*deltaY = antpos[c + 1] - foodpos[c + 1];
+    deltaX = antpos[c] - foodpos[c];
+    angleInDegrees = atan2(deltaY, deltaX) * 180 / math.PI;*/
 
     //Write target coordinates
     ctx.fillStyle = "black";
     ctx.fillText(foodpos[closestFoodIndex], 200, 500);
     ctx.fillText(foodpos[closestFoodIndex + 1], 200, 560);
     ctx.fillStyle = "white";
-}
-
-/**
- * Writes the score as text on the canvas
- */
-function setscore() {
-    ctx.fillStyle = "black";
-    ctx.fillText(score, 30, 30);
 }
 
 /**
@@ -203,6 +207,7 @@ function updateFood() {
         scnt++;
     }
 }
+
 /**
  * find a random number within a range
  * @param {int} max 
@@ -210,9 +215,28 @@ function updateFood() {
  * @returns {int} 
  */
 function ran(min, max) {
-    return Math.floor(Math.random() * (max - min + 1)) + min;
+    return Math.floor(Math.random() * (max - min)) + min;
 }
-//------why does it add 1?
+
+/**
+ * find a random number within a range
+ * @param {int} max 
+ * @param {int} min
+ * @returns {int} 
+ */
+function getDifficulty() {
+    var ran = Math.random(); 
+    if (ran < ORANGE_PROBABILITY) {
+        return 1;
+    }
+    if (ran < ORANGE_PROBABILITY + RED_PROBABILITY){
+        return 2;
+    }
+    if (ran < ORANGE_PROBABILITY + RED_PROBABILITY +BLACK_PROBABILITY) {
+        return 3;
+    }
+    return 1;
+}
 
 /**
  * Calculates the distance squared between a given ant and a given food
@@ -230,9 +254,9 @@ function getDistance(antx, anty, foodx, foody) {
 function newant() {
     // Give the ant a random position to spawn
     antpos.push(ran(X_SPAWN_MIN, X_SPAWN_MAX));
-    // Give the ant
+    // Give the ant a y position
     antpos.push(0);
-    antcount++;
+    antpos.push(getDifficulty())
 }
 
 /*This is a time-based approach to animation
