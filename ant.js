@@ -12,25 +12,23 @@ Y_SPAWN_MIN = 100,
 Y_SPAWN_MAX = 500,
 SPAWN_TIME_MIN = 1,
 SPAWN_TIME_MAX = 3,
-BLACK_SPEED = 150,
-BLACK_SCORE = 150,
-BLACK_PROBABILITY = 150,
-RED_SPEED = 75,
-RED_SCORE = 75,
-RED_PROBABILITY = 75,
-ORANGE_SPEED = 60,
-ORANGE_SCORE = 60,
-ORANGE_PROBABILITY = 60,
+BLACK_SPEED = 2.5,
+BLACK_SCORE = 5,
+BLACK_PROBABILITY = 0.3,
+RED_SPEED = 1.25,
+RED_SCORE = 3,
+RED_PROBABILITY = 0.3,
+ORANGE_SPEED = 1,
+ORANGE_SCORE = 1,
+ORANGE_PROBABILITY = 0.5,
 FOOD_COUNT = 5,
 LEVEL1_BUFF = 1.0,
 LEVEL2_BUFF = 0.75,
 FADE_TIME = 2,
 TIMER_START = 60,
 GAME_FONTS = "bold 20px sans-serif";
-LEVEL = 0;
 
 var canvas = null;
-var img = null;
 var ctx = null;
 var imageReady = false;
 var foodpos = [];
@@ -57,22 +55,6 @@ window.requestAnimationFrame = (function () {
             };
 })();
 
-function startpage(){
-	
-	document.getElementById('startcenter').style.display = 'none';
-	document.getElementById('gameCanvas').style.display = 'none';
-	var levelone = document.getElementById("radio-one");
-	levelone.checked = true; lEVEL = 1;
-	var leveltwo = document.getElementById("radio-two");
-	leveltwo.checked = true; lEVEL = 2;
-	document.getElementById('startbutton').onclick = function () {
-		this.parentNode.style.display = 'none';
-		document.getElementById('startcenter').style.display = 'block';
-		document.getElementById('gameCanvas').style.display = 'block';
-		onload();
-		};  
-}
-
 //Setup the canvas and the image of the bug
 function onload() {
     // Create the canvas element
@@ -88,23 +70,17 @@ function onload() {
     // Add event for mouse clicking
     canvas.addEventListener("click", ifclicked, false);
 
-    img = new Image();
-    img.src = 'ant.jpg';
-    img.width = BUG_WIDTH;
-    img.height = BUG_HIGHT;
 
     newant();
-    redraw();
+    draw();
 
     //set the food
-    for (var i = 0; i < 5; i++) {
+    for (var i = 0; i < FOOD_COUNT; i++) {
         setFood();
     }
     fooditems = ["food1", "food2", "food3", "food4", "food5"];
 }
-
-
-//draw the objects on the cavas and redraw everytime it is called.
+//draw the objects on the cavas and draw everytime draw() is called.
 //ref http://miloq.blogspot.ca/
 
 function ifclicked(event) {
@@ -128,59 +104,62 @@ function ifclicked(event) {
     }
 }
 
-function redraw() {
+function draw() {
 
     updateFood();
-    setants();
-
-    // Draw the ant image
     for (var c = 0; c < antpos.length; c += 2) {
-        ctx.drawImage(img, antpos[c], antpos[c + 1]);
+        updateAnts(0.5, 'ant.jpg', c);
     }
+    setscore();
+}
+
+function updateAnts(speed, imgPath, c) {
+    // Draw the ant image
+    var img = new Image();
+    img.src = imgPath;
+    img.width = BUG_WIDTH;
+    img.height = BUG_HIGHT;
+    ctx.drawImage(img, antpos[c], antpos[c + 1]);
 
     // Find the closest food to the ant
     var closestFoodIndex;
     var closestFoodDist = -1
     var dist;
     for (var i = 0; i < foodpos.length; i += 2) {
-        dist = getDistance(antpos[0], antpos[1], foodpos[i], foodpos[i + 1]);
-        if (closestFoodDist == -1 || closestFoodDist > dist)
-        {
+        dist = getDistance(antpos[c], antpos[c + 1], foodpos[i], foodpos[i + 1]);
+        if (closestFoodDist == -1 || closestFoodDist > dist) {
             closestFoodDist = dist;
             closestFoodIndex = i;
         }
     }
 
-    // Move ant towards the food
-    if (foodpos[closestFoodIndex] > antpos[0]) {
-        antpos[0] += 1;
-    } else {
-        antpos[0] -= 1;
+    // Move ant towards the food only if it has a target
+    if (closestFoodIndex !== undefined) {
+        if (foodpos[closestFoodIndex] > antpos[c]) {
+            antpos[c] += speed;
+        } else {
+            antpos[c] -= speed;
+        }
+        if (foodpos[closestFoodIndex + 1] > antpos[c + 1]) {
+            antpos[c + 1] += speed;
+        } else {
+            antpos[c + 1] -= speed;
+        }
     }
-    if (foodpos[closestFoodIndex + 1] > antpos[1]) {
-        antpos[1] += 1;
-    } else {
-        antpos[1] -= 1;
-    }
+
+    //Write target coordinates
     ctx.fillStyle = "black";
     ctx.fillText(foodpos[closestFoodIndex], 200, 500);
     ctx.fillText(foodpos[closestFoodIndex + 1], 200, 560);
     ctx.fillStyle = "white";
-    //	if (foodpos[foodcloser-1]-10 < antpos[0]
-    //		&& foodpos[foodcloser]-15 < antpos[1]){
-    //			gamestop = true;
-    //	}
-    setscore();
 }
+
+/**
+ * Writes the score as text on the canvas
+ */
 function setscore() {
     ctx.fillStyle = "black";
     ctx.fillText(score, 30, 30);
-}
-
-function setants() {
-    //find which ants are closet to which foods
-    //update their position relative to the foods
-
 }
 
 /**
@@ -278,7 +257,7 @@ function update() {
         //Check to see if food is eaten then stops drawing the canvas.
         if (!gamestop) {
             ctx.clearRect(0, 0, WIDTH, HEIGHT);
-            redraw();
+            draw();
         }
     } else {
         acDelta += delta;
