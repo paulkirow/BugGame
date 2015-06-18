@@ -1,9 +1,40 @@
-﻿var canvas = null;
+﻿
+var
+/** Constants **/
+WIDTH = 400,
+HEIGHT = 600,
+FOOD_WIDTH = 20,
+FOOD_HIGHT = 20,
+BUG_WIDTH = 10,
+BUG_HIGHT = 40,
+X_SPAWN_MIN = 10,
+X_SPAWN_MAX = 390,
+Y_SPAWN_MIN = 100,
+Y_SPAWN_MAX = 500,
+SPAWN_TIME_MIN = 1,
+SPAWN_TIME_MAX = 3,
+BLACK_SPEED = 150,
+BLACK_SCORE = 150,
+BLACK_PROBABILITY = 150,
+RED_SPEED = 75,
+RED_SCORE = 75,
+RED_PROBABILITY = 75,
+ORANGE_SPEED = 60,
+ORANGE_SCORE = 60,
+ORANGE_PROBABILITY = 60,
+FOOD_COUNT = 5,
+LEVEL1_BUFF = 1.0,
+LEVEL2_BUFF = 0.75,
+FADE_TIME = 2,
+TIMER_START = 60,
+GAME_FONTS = "bold 20px sans-serif";
+
+var canvas = null;
 var img = null;
 var ctx = null;
 var imageReady = false;
-var canvasWidth = 400;
-var canvasHeight = 600;
+var WIDTH = 400;
+var HEIGHT = 600;
 var foodpos = [];
 var antpos = [];
 var antcount = 0;
@@ -11,7 +42,6 @@ var closer = 1;
 var gamestop = false;
 var foodcloser = 0;
 var score = 0;
-var GAME_FONTS = "bold 20px sans-serif";
 var fooditems = [];
 
 /*Setup the animation frame for each browser
@@ -20,30 +50,38 @@ var fooditems = [];
 */
 window.requestAnimationFrame = (function () {
     return window.requestAnimationFrame ||
-			window.webkitRequestAnimationFrame ||
-			window.mozRequestAnimationFrame ||
-			window.oRequestAnimationFrame ||
-			window.msRequestAnimationFrame ||
-			function (callback) {
-			    window.setTimeout(callback, 1000 / 10);
-			};
+            window.webkitRequestAnimationFrame ||
+            window.mozRequestAnimationFrame ||
+            window.oRequestAnimationFrame ||
+            window.msRequestAnimationFrame ||
+            function (callback) {
+                window.setTimeout(callback, 1000 / 10);
+            };
 })();
 
 //Setup the canvas and the image of the bug
 function onload() {
-
+    // Create the canvas element
     canvas = document.getElementById('gameCanvas');
+    canvas.setAttribute('width', WIDTH);
+    canvas.setAttribute('height', HEIGHT);
+
     ctx = canvas.getContext("2d");
-    canvas.setAttribute('width', canvasWidth);
-    canvas.setAttribute('height', canvasHeight);
     ctx.globalCompositeOperation = 'destination-over';
-    ctx.clearRect(0, 0, canvasWidth, canvasHeight); // clear canvas
-    canvas.addEventListener("click", ifclicked, false);
+    ctx.clearRect(0, 0, WIDTH, HEIGHT); // clear canvas
     ctx.font = GAME_FONTS;
+
+    // Add event for mouse clicking
+    canvas.addEventListener("click", ifclicked, false);
+
     img = new Image();
     img.src = 'ant.jpg';
+    img.width = BUG_WIDTH;
+    img.height = BUG_HIGHT;
+
     newant();
     redraw();
+
     //set the food
     for (var i = 0; i < 10; i++) {
         foodpos.push(ran(50, 350));
@@ -113,9 +151,9 @@ function redraw() {
     ctx.fillText(foodpos[foodcloser - 1], 200, 500);
     ctx.fillText(foodpos[foodcloser], 200, 560);
     ctx.fillStyle = "white";
-    //	if (foodpos[foodcloser-1]-10 < antpos[0] 
+    //	if (foodpos[foodcloser-1]-10 < antpos[0]
     //		&& foodpos[foodcloser]-15 < antpos[1]){
-    //			gamestop = true; 
+    //			gamestop = true;
     //	}
     setscore();
 }
@@ -126,8 +164,8 @@ function setscore() {
 }
 
 function setants() {
-    //find which ants are closet to which foods	
-    //update their position relative to the foods	
+    //find which ants are closet to which foods
+    //update their position relative to the foods
 
 }
 
@@ -140,7 +178,7 @@ function setfood() {
     for (var c = 0; c < antpos.length; c += 2) {
         for (var i = 0; i < foodpos.length; i += 2) {
             if (foodpos[i] <= antpos[c] && foodpos[i] + 20 >= antpos[c]
-				&& foodpos[i + 1] <= antpos[c + 1] && foodpos[i + 1] + 20 >= antpos[c + 1]) {
+                && foodpos[i + 1] <= antpos[c + 1] && foodpos[i + 1] + 20 >= antpos[c + 1]) {
                 foodpos.splice(i, 2);
             }// if
         } // for
@@ -155,18 +193,20 @@ function setfood() {
         scnt++;
     }
 }
-//find a random number 
+//find a random number
 function ran(min, max) {
     return Math.floor(Math.random() * (max - min + 1)) + min;
 }
 
 function newant() {
-    antpos.push(ran(10, 390));
+    // Give the ant a random position to spawn
+    antpos.push(ran(X_SPAWN_MIN, X_SPAWN_MAX));
+    // Give the ant
     antpos.push(10);
     antcount++;
 }
 
-/*This is a time-based approach to animation 
+/*This is a time-based approach to animation
 * Found here: http://buildnewgames.com/dom-sprites/
 * It calculates how long the last frame took to load
 * then sets the load time of the next frame to match
@@ -186,9 +226,9 @@ function update() {
 
     if (acDelta > msPerFrame) {
         acDelta = 0;
-        //Check to see if food is eaten then stops drawing the canvas. 
+        //Check to see if food is eaten then stops drawing the canvas.
         if (!gamestop) {
-            ctx.clearRect(0, 0, canvasWidth, canvasHeight);
+            ctx.clearRect(0, 0, WIDTH, HEIGHT);
             redraw();
         }
     } else {
