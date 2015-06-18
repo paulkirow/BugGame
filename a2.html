@@ -1,24 +1,13 @@
 ﻿<!DOCTYPE html>
-<html xmlns="http://www.w3.org/1999/xhtml">
+<html>
 <head>
     <title>Ant Game</title>
     <link rel="stylesheet" href="main.css" />
 </head>
-<body>
-<div class="page1">
-    <div>
-        Level:
-        <form id="level" action="">
-            <input type="radio" name="level" value="1">1
-            <input type="radio" name="level" value="2">2
-        </form>
+<body onload="onload();">
+    <div style="margin:auto;width:500px;height:600px;">
+        <canvas id="gameCanvas" style="border: 1px solid black;"></canvas>
     </div>
-    <button onclick="main()">Start</button>
-    <div>High Score:
-        <div id="score"></div>
-    </div>
-</div>
-
 <script language="javascript" src="ant.js"></script>
 </body>
 </html>
