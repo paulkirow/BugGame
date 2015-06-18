@@ -27,6 +27,7 @@ LEVEL2_BUFF = 0.75,
 FADE_TIME = 2,
 TIMER_START = 60,
 GAME_FONTS = "bold 20px sans-serif";
+LEVEL = 0;
 
 var canvas = null;
 var ctx = null;
@@ -39,6 +40,7 @@ var gamestop = false;
 var foodcloser = 0;
 var score = 0;
 var fooditems = [];
+
 
 /*Setup the animation frame for each browser
 * set the callback to 60FPS
@@ -54,6 +56,22 @@ window.requestAnimationFrame = (function () {
                 window.setTimeout(callback, 1000 / 10);
             };
 })();
+
+function startpage(){
+	
+	document.getElementById('startcenter').style.display = 'none';
+	document.getElementById('gameCanvas').style.display = 'none';
+	var levelone = document.getElementById("radio-one");
+	levelone.checked = true; LEVEL = 1;
+	var leveltwo = document.getElementById("radio-two");
+	leveltwo.checked = true; LEVEL = 2;
+	document.getElementById('startbutton').onclick = function () {
+		this.parentNode.style.display = 'none';
+		document.getElementById('startcenter').style.display = 'block';
+		document.getElementById('gameCanvas').style.display = 'block';
+		onload();
+		};  
+}
 
 //Setup the canvas and the image of the bug
 function onload() {
@@ -95,22 +113,35 @@ function ifclicked(event) {
 
     x -= canvas.offsetLeft;
     y -= canvas.offsetTop;
-
-    var distancesquared = Math.sqrt(Math.pow((x - antpos[0]), 2) + Math.pow((y - antpos[1]), 2));
-    if (distancesquared <= 30) {
-        antcount--;
-        score++;
-        antpos.splice(0, 2);
-    }
+	for ( var i = 0; i < antpos.length; i+=2){
+		var distancesquared = Math.sqrt(Math.pow((x - antpos[i]), 2) + Math.pow((y - antpos[i+1]), 2));
+		if (distancesquared <= 30) {
+			antcount--;
+			score++;
+			antpos.splice(i, 2);
+		}
+	}
 }
 
 function draw() {
-
+	ctx.beginPath();
+	ctx.fillStyle = "black";
+    ctx.fillText(score, 350, 30);
+	
+	ctx.beginPath();
+    ctx.rect(0, 0, WIDTH, 40);
+    ctx.fillStyle = 'white';
+    ctx.fill();
+	ctx.beginPath();
+    ctx.moveTo(0, 40);
+    ctx.lineTo(WIDTH, 40);
+    ctx.stroke();
     updateFood();
     for (var c = 0; c < antpos.length; c += 2) {
         updateAnts(0.5, 'ant.jpg', c);
     }
-    setscore();
+	
+    
 }
 
 function updateAnts(speed, imgPath, c) {
@@ -148,10 +179,10 @@ function updateAnts(speed, imgPath, c) {
     }
 
     //Write target coordinates
-    ctx.fillStyle = "black";
-    ctx.fillText(foodpos[closestFoodIndex], 200, 500);
-    ctx.fillText(foodpos[closestFoodIndex + 1], 200, 560);
-    ctx.fillStyle = "white";
+//    ctx.fillStyle = "black";
+//    ctx.fillText(foodpos[closestFoodIndex], 200, 500);
+//    ctx.fillText(foodpos[closestFoodIndex + 1], 200, 560);
+//    ctx.fillStyle = "white";
 }
 
 /**
