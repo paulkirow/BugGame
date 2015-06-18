@@ -4,9 +4,20 @@
     <title>Ant Game</title>
     <link rel="stylesheet" href="main.css" />
 </head>
-<body onload="onload();">
-    <div style="margin:auto;width:500px;height:600px;">
-        <canvas id="gameCanvas" style="border: 1px solid black;"></canvas>
+<body onload="startpage();">
+    <div id="gamestart" >
+    	<p id="gametitle">Ant Scape</p>
+  		<div id="radio-btn">
+	        <label>Level:</label>
+     		<input id="radio-one" type="radio"  name="level" value="one"> 1
+    	 	<input id="radio-two" type="radio"  name="level" value="two"> 2
+  		</div>
+        	<button id="startbutton" type="button">START</button> 
+	</div>
+       
+    </div>
+    <div id="startcenter" >
+     <canvas id="gameCanvas" ></canvas>
     </div>
 <script language="javascript" src="ant.js"></script>
 </body>

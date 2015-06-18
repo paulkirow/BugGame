@@ -1,0 +1,50 @@
+#gametitle{
+	font-size:40px;
+	font-family:Impact, Haettenschweiler, "Franklin Gothic Bold", "Arial Black", sans-serif;
+	color:#C80C0F;
+	padding-top:100px;
+	padding-left:110px;
+	margin-bottom:-150px;
+	
+}
+#gamestart {
+	margin:auto;
+	width:400px;
+	height:600px;	
+	border:solid;
+	border-width:1px;
+	
+}
+#startcenter {
+	margin:auto;
+	width:400px;
+	height:600px;	
+	border:solid;
+	border-width:1px;	
+}
+#radio-btn {
+	padding-top:200px;
+	margin-left:140px;
+	
+	
+}
+#radio-one{
+	padding-left:30px;	
+	
+}
+#startbutton{
+	border:solid;
+	border-width:1px;
+	width:80px;
+	height:40px;
+	margin-top:30px;
+	margin-left:155px;
+}
+#starttext{
+	padding-left:15px;
+	margin-top:10px;
+
+}
+#gameCanvas{
+		
+}

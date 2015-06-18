@@ -27,6 +27,7 @@ LEVEL2_BUFF = 0.75,
 FADE_TIME = 2,
 TIMER_START = 60,
 GAME_FONTS = "bold 20px sans-serif";
+LEVEL = 0;
 
 var canvas = null;
 var img = null;
@@ -55,6 +56,22 @@ window.requestAnimationFrame = (function () {
                 window.setTimeout(callback, 1000 / 10);
             };
 })();
+
+function startpage(){
+	
+	document.getElementById('startcenter').style.display = 'none';
+	document.getElementById('gameCanvas').style.display = 'none';
+	var levelone = document.getElementById("radio-one");
+	levelone.checked = true; lEVEL = 1;
+	var leveltwo = document.getElementById("radio-two");
+	leveltwo.checked = true; lEVEL = 2;
+	document.getElementById('startbutton').onclick = function () {
+		this.parentNode.style.display = 'none';
+		document.getElementById('startcenter').style.display = 'block';
+		document.getElementById('gameCanvas').style.display = 'block';
+		onload();
+		};  
+}
 
 //Setup the canvas and the image of the bug
 function onload() {
@@ -85,6 +102,8 @@ function onload() {
     }
     fooditems = ["food1", "food2", "food3", "food4", "food5"];
 }
+
+
 //draw the objects on the cavas and redraw everytime it is called.
 //ref http://miloq.blogspot.ca/
 
@@ -266,6 +285,6 @@ function update() {
     }
     lastUpdateTime = Date.now();
 }
-//var anttime = setInterval(newant,ran(1,3)*1000);
+var anttime = setInterval(newant,ran(1,3)*1000);
 //clearInterval(t);
 var fps = setTimeout(update, 1000 / 60);
