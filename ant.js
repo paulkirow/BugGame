@@ -1,6 +1,5 @@
-﻿
+﻿/** Constants **/
 var
-/** Constants **/
 WIDTH = 400,
 HEIGHT = 600,
 FOOD_WIDTH = 20,
@@ -33,8 +32,6 @@ var canvas = null;
 var img = null;
 var ctx = null;
 var imageReady = false;
-var WIDTH = 400;
-var HEIGHT = 600;
 var foodpos = [];
 var antpos = [];
 var antcount = 0;
@@ -83,13 +80,14 @@ function onload() {
     redraw();
 
     //set the food
-    for (var i = 0; i < 10; i++) {
-        foodpos.push(ran(50, 350));
+    for (var i = 0; i < 5; i++) {
+        setFood();
     }
     fooditems = ["food1", "food2", "food3", "food4", "food5"];
 }
 //draw the objects on the cavas and redraw everytime it is called.
 //ref http://miloq.blogspot.ca/
+
 function ifclicked(event) {
 
     if (event.x != undefined && event.y != undefined) {
@@ -110,46 +108,44 @@ function ifclicked(event) {
         antpos.splice(0, 2);
     }
 }
+
 function redraw() {
 
-    setfood();
+    updateFood();
     setants();
 
+    // Draw the ant image
     for (var c = 0; c < antpos.length; c += 2) {
         ctx.drawImage(img, antpos[c], antpos[c + 1]);
     }
 
-
-    var closer = 1;
-    var far = 3;
-
-    for (var i = 0; i < 3; i++) {
-        if (foodpos[closer] < foodpos[far]) {
-            far += 2;
-        } else {
-            closer = far;
-            if (far + 2 == "") {
-                break;
-            } else {
-                far += 2;
-            }
+    // Find the closest food to the ant
+    var closestFoodIndex;
+    var closestFoodDist = -1
+    var dist;
+    for (var i = 0; i < foodpos.length; i += 2) {
+        dist = getDistance(antpos[0], antpos[1], foodpos[i], foodpos[i + 1]);
+        if (closestFoodDist == -1 || closestFoodDist > dist)
+        {
+            closestFoodDist = dist;
+            closestFoodIndex = i;
         }
     }
-    foodcloser = closer;
 
-    if (foodpos[foodcloser - 1] > antpos[0]) {
+    // Move ant towards the food
+    if (foodpos[closestFoodIndex] > antpos[0]) {
         antpos[0] += 1;
     } else {
         antpos[0] -= 1;
     }
-    if (foodpos[foodcloser] > antpos[1]) {
+    if (foodpos[closestFoodIndex + 1] > antpos[1]) {
         antpos[1] += 1;
     } else {
         antpos[1] -= 1;
     }
     ctx.fillStyle = "black";
-    ctx.fillText(foodpos[foodcloser - 1], 200, 500);
-    ctx.fillText(foodpos[foodcloser], 200, 560);
+    ctx.fillText(foodpos[closestFoodIndex], 200, 500);
+    ctx.fillText(foodpos[closestFoodIndex + 1], 200, 560);
     ctx.fillStyle = "white";
     //	if (foodpos[foodcloser-1]-10 < antpos[0]
     //		&& foodpos[foodcloser]-15 < antpos[1]){
@@ -158,7 +154,6 @@ function redraw() {
     setscore();
 }
 function setscore() {
-
     ctx.fillStyle = "black";
     ctx.fillText(score, 30, 30);
 }
@@ -169,16 +164,33 @@ function setants() {
 
 }
 
-/*Create an array of the position of the foods.
-  Create the food items. */
-function setfood() {
+/**
+ * Sets a single food onto a random position within the bounds
+ * of the spawn limits and width/height
+ * @returns {food} 
+ */
+function setFood() {
+    var randx = Math.round(Math.random() * (X_SPAWN_MAX - X_SPAWN_MIN - FOOD_WIDTH) + X_SPAWN_MIN);
+    var randy = Math.round(Math.random() * (Y_SPAWN_MAX - Y_SPAWN_MIN - FOOD_HIGHT) + Y_SPAWN_MIN);
+    //return food.create(randx, randy);
+    foodpos.push(randx);
+    foodpos.push(randy);
+    //---- Food can currently overlap!!
+}
 
+/**
+ * Create an array of the position of the foods.
+ * Create the food items.
+ */
+function updateFood() {
     //Check if any ants are within the perimeter of the food.
     //if so then remove the food.
     for (var c = 0; c < antpos.length; c += 2) {
         for (var i = 0; i < foodpos.length; i += 2) {
-            if (foodpos[i] <= antpos[c] && foodpos[i] + 20 >= antpos[c]
-                && foodpos[i + 1] <= antpos[c + 1] && foodpos[i + 1] + 20 >= antpos[c + 1]) {
+            if (antpos[c] + BUG_WIDTH > foodpos[i]
+                && antpos[c] < foodpos[i] + FOOD_WIDTH
+                && antpos[c + 1] + BUG_HIGHT > foodpos[i +1]
+                && antpos[c + 1] < foodpos[i + 1] + FOOD_HIGHT) {
                 foodpos.splice(i, 2);
             }// if
         } // for
@@ -188,21 +200,40 @@ function setfood() {
     var scnt = 0;
     for (var m = 0; m < foodpos.length; m += 2) {
         fooditems[scnt] = new Path2D;
-        fooditems[scnt].rect(foodpos[m], foodpos[m + 1], 20, 20);
+        fooditems[scnt].rect(foodpos[m], foodpos[m + 1], FOOD_WIDTH, FOOD_HIGHT);
         ctx.stroke(fooditems[scnt]);
         scnt++;
     }
 }
-//find a random number
+/**
+ * find a random number within a range
+ * @param {int} max 
+ * @param {int} min
+ * @returns {int} 
+ */
 function ran(min, max) {
     return Math.floor(Math.random() * (max - min + 1)) + min;
 }
+//------why does it add 1?
+
+/**
+ * Calculates the distance squared between a given ant and a given food
+ * @param {int} antx 
+ * @param {int} anty 
+ * @param {int} foodx 
+ * @param {int} foody 
+ * @returns {int} 
+ */
+function getDistance(antx, anty, foodx, foody) {
+    return Math.pow(antx - foodx, 2) + Math.pow(anty - foody, 2);
+}
+
 
 function newant() {
     // Give the ant a random position to spawn
     antpos.push(ran(X_SPAWN_MIN, X_SPAWN_MAX));
     // Give the ant
-    antpos.push(10);
+    antpos.push(0);
     antcount++;
 }
 
@@ -214,7 +245,6 @@ function newant() {
 * the objects on the canvas move the same distance
 * the game effectively does not slow down.
 */
-
 var lastUpdateTime = 0;
 var acDelta = 0;
 var msPerFrame = 10;
