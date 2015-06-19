@@ -25,19 +25,17 @@ FOOD_COUNT = 5,
 LEVEL1_BUFF = 1.0,
 LEVEL2_BUFF = 0.75,
 FADE_TIME = 2,
-TIMER_START = 60,
-GAME_FONTS = "bold 20px sans-serif";
-LEVEL = 0;
+GAME_FONTS = "bold 20px sans-serif",
+FRAMES = 60;
 
+var time = 60;
 var canvas = null;
 var ctx = null;
-var imageReady = false;
 var foodpos = [];
 var antpos = [];
-var antcount = 0;
-var closer = 1;
-var gamestop = false;
-var foodcloser = 0;
+var createAnt = false;
+var paused = false;
+var gameover = false;
 var score = 0;
 var fooditems = [];
 
@@ -61,10 +59,6 @@ function startpage(){
 	
 	document.getElementById('startcenter').style.display = 'none';
 	document.getElementById('gameCanvas').style.display = 'none';
-	var levelone = document.getElementById("radio-one");
-	levelone.checked = true; LEVEL = 1;
-	var leveltwo = document.getElementById("radio-two");
-	leveltwo.checked = true; LEVEL = 2;
 	document.getElementById('startbutton').onclick = function () {
 		this.parentNode.style.display = 'none';
 		document.getElementById('startcenter').style.display = 'block';
@@ -88,14 +82,28 @@ function onload() {
     // Add event for mouse clicking
     canvas.addEventListener("click", ifclicked, false);
 
-
-    newant();
     draw();
 
-    //set the food
+    // set the food
     for (var i = 0; i < FOOD_COUNT; i++) {
         setFood();
     }
+
+    // Change the speeds based on the level
+    var levelone = document.getElementById("radio-one");
+    var leveltwo = document.getElementById("radio-two");
+    if (levelone.checked == true)
+    {
+        ORANGE_SPEED = ORANGE_SPEED / LEVEL1_BUFF;
+        RED_SPEED = RED_SPEED / LEVEL1_BUFF;
+        BLACK_SPEED = BLACK_SPEED / LEVEL1_BUFF;
+    }
+    else if (leveltwo.checked == true) {
+        ORANGE_SPEED = ORANGE_SPEED / LEVEL2_BUFF;
+        RED_SPEED = RED_SPEED / LEVEL2_BUFF;
+        BLACK_SPEED = BLACK_SPEED / LEVEL2_BUFF;
+    }
+
     fooditems = ["food1", "food2", "food3", "food4", "food5"];
 }
 
@@ -113,19 +121,24 @@ function ifclicked(event) {
     y -= canvas.offsetTop;
 	
 	
-	if ( x >= 170 && x <= 180 && y >= 5 && y <= 15 ){
-		gamestop=true;
+	if ( x >= 160 && x <= 190 && y >= 20 && y <= 40 ){
+		paused=!paused;
 	}
-	
-	
-	
-	
-	for ( var i = 0; i < antpos.length; i+=2){
+
+	for ( var i = 0; i < antpos.length; i+=3){
 		var distancesquared = Math.sqrt(Math.pow((x - antpos[i]), 2) + Math.pow((y - antpos[i+1]), 2));
 		if (distancesquared <= 30) {
-			antcount--;
-			score++;
-			antpos.splice(i, 2);
+            // Add score based on ant level
+		    if (antpos[i + 2] == 1) {
+		        score+=ORANGE_SCORE;
+		    }
+		    else if (antpos[i + 2] == 2) {
+		        score+=RED_SCORE;
+		    }
+		    else if (antpos[i + 2] == 3) {
+		        score+=BLACK_SCORE;
+		    }
+			antpos.splice(i, 3);
 		}
 	}
 }
@@ -141,7 +154,7 @@ function draw() {
 	
 	ctx.beginPath();
 	ctx.fillStyle = "black";
-	ctx.fillText(TIMER_START, 50, 30);
+	ctx.fillText(time, 50, 30);
 	
 	ctx.beginPath();
 	ctx.rect(170, 15, 5, 15);
@@ -158,7 +171,6 @@ function draw() {
     ctx.moveTo(0, 40);
     ctx.lineTo(WIDTH, 40);
     ctx.stroke();
-	
 	
     updateFood();
 
@@ -199,26 +211,14 @@ function updateAnts(speed, imgPath, index) {
 
     // Move ant towards the food only if it has a target
     if (closestFoodIndex !== undefined) {
-        if (foodpos[closestFoodIndex] > antpos[index]) {
-            antpos[index] += speed;
-        } else {
-            antpos[index] -= speed;
-        }
-        if (foodpos[closestFoodIndex + 1] > antpos[index + 1]) {
-            antpos[index + 1] += speed;
-        } else {
-            antpos[index + 1] -= speed;
-        }
-    }
-    /*deltaY = antpos[c + 1] - foodpos[c + 1];
-    deltaX = antpos[c] - foodpos[c];
-    angleInDegrees = atan2(deltaY, deltaX) * 180 / math.PI;*/
+        // Normalize
+        var xdist = (foodpos[closestFoodIndex] - antpos[index]) / Math.sqrt(closestFoodDist);
+        var ydist = (foodpos[closestFoodIndex + 1] - antpos[index + 1]) / Math.sqrt(closestFoodDist);
 
-    //Write target coordinates
-//    ctx.fillStyle = "black";
-//    ctx.fillText(foodpos[closestFoodIndex], 200, 500);
-//    ctx.fillText(foodpos[closestFoodIndex + 1], 200, 560);
-//    ctx.fillStyle = "white";
+        // Update Location
+        antpos[index] += xdist * speed;
+        antpos[index + 1] += ydist * speed;
+    }
 }
 
 /**
@@ -306,16 +306,26 @@ function getDistance(antx, anty, foodx, foody) {
 }
 
 
-function newant() {
-    // Give the ant a random position to spawn
-    antpos.push(ran(X_SPAWN_MIN, X_SPAWN_MAX));
-    // Give the ant a y position
-    antpos.push(0);
-    antpos.push(getDifficulty())
+function newAnt() {
+    if (createAnt == true) {
+        // Give the ant a random position to spawn
+        antpos.push(ran(X_SPAWN_MIN, X_SPAWN_MAX));
+        // Give the ant a y position
+        antpos.push(0);
+        // Give the ant a random difficulty
+        antpos.push(getDifficulty())
+        createAnt = false;
+    }
 }
-function settimer(){
-	
-	TIMER_START--;
+function settimer() {
+    // Reduce time untill it is zero
+    if (time > 0) {
+        time--;
+    }
+    // End the game once the time is zero
+    else if (time == 0) {
+        gameover = true;
+    }
 }
 
 /*This is a time-based approach to animation
@@ -337,17 +347,27 @@ function update() {
 
     if (acDelta > msPerFrame) {
         acDelta = 0;
+
         //Check to see if food is eaten then stops drawing the canvas.
-        if (!gamestop) {
+        if (gameover) {
+            // CODE FOR GAMEOVER HERE
+        }
+        else if (!paused) {
             ctx.clearRect(0, 0, WIDTH, HEIGHT);
+            newAnt();
             draw();
         }
     } else {
         acDelta += delta;
     }
     lastUpdateTime = Date.now();
+    //Debug
+    ctx.fillStyle = "black";
+    ctx.fillText("IS PAUSED", 200, 500);
+    ctx.fillText(paused, 200, 560);
+    ctx.fillStyle = "white";
 }
 var timer = setInterval(settimer, 1000);
-var anttime = setInterval(newant,ran(1,3)*1000);
+var anttime = setInterval(function () { createAnt = true; },ran(1,3)*1000);
 //clearInterval(t);
-var fps = setTimeout(update, 1000 / 60);
+var fps = setTimeout(update, 1000 / FRAMES);
