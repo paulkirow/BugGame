@@ -15,12 +15,16 @@ SPAWN_TIME_MAX = 3,
 BLACK_SPEED = 2.5,
 BLACK_SCORE = 5,
 BLACK_PROBABILITY = 0.3,
+BLACK_IMG = "ant3.png",
 RED_SPEED = 1.25,
 RED_SCORE = 3,
 RED_PROBABILITY = 0.3,
+RED_IMG = "ant2.png",
 ORANGE_SPEED = 1,
 ORANGE_SCORE = 1,
 ORANGE_PROBABILITY = 0.4,
+ORANGE_IMG = "ant1.png",
+FOOD_IMG = "food.png",
 FOOD_COUNT = 5,
 LEVEL1_BUFF = 1.0,
 LEVEL2_BUFF = 0.75,
@@ -56,7 +60,6 @@ window.requestAnimationFrame = (function () {
 })();
 
 function startpage(){
-	
 	document.getElementById('startcenter').style.display = 'none';
 	document.getElementById('gameCanvas').style.display = 'none';
 	document.getElementById('startbutton').onclick = function () {
@@ -108,7 +111,7 @@ function onload() {
 }
 
 function ifclicked(event) {
-
+    // Identify the x anf y coordinates
     if (event.x != undefined && event.y != undefined) {
         x = event.x;
         y = event.y;
@@ -120,7 +123,7 @@ function ifclicked(event) {
     x -= canvas.offsetLeft;
     y -= canvas.offsetTop;
 	
-	
+	// Check is the click was in bounds of the pause button
 	if ( x >= 160 && x <= 190 && y >= 20 && y <= 40 ){
 		paused=!paused;
 	}
@@ -143,8 +146,9 @@ function ifclicked(event) {
 	}
 }
 
-//draw the objects on the cavas and draw everytime draw() is called.
-//ref http://miloq.blogspot.ca/
+/**
+ * Update the canvas
+ */
 function draw() {
 	
 	ctx.beginPath();
@@ -173,23 +177,33 @@ function draw() {
     ctx.stroke();
 	
     updateFood();
+    updateAnts();
+}
 
+/**
+ * Update each ant based on their type
+ */
+function updateAnts() {
     for (var c = 0; c < antpos.length; c += 3) {
-        if (antpos[c+2] == 1)
-        {
-            updateAnts(ORANGE_SPEED, 'ant.jpg', c);
+        if (antpos[c + 2] == 1) {
+            updateAnt(ORANGE_SPEED, ORANGE_IMG, c);
         }
-        else if (antpos[c+2] == 2)
-        {
-            updateAnts(RED_SPEED, 'ant.jpg', c);
+        else if (antpos[c + 2] == 2) {
+            updateAnt(RED_SPEED, RED_IMG, c);
         }
         else if (antpos[c + 2] == 3) {
-            updateAnts(BLACK_SPEED, 'ant.jpg', c);
+            updateAnt(BLACK_SPEED, BLACK_IMG, c);
         }
     }
 }
 
-function updateAnts(speed, imgPath, index) {
+/**
+ * Draw the ant then update the ants position and target
+ * @param {float} speed 
+ * @param {string} imgPath
+ * @param {int} index
+ */
+function updateAnt(speed, imgPath, index) {
     // Draw the ant image
     var img = new Image();
     img.src = imgPath;
@@ -222,6 +236,35 @@ function updateAnts(speed, imgPath, index) {
 }
 
 /**
+ * Check for bug eating food
+ * Draw Food
+ */
+function updateFood() {
+    //Check if any ants are within the perimeter of the food.
+    //if so then remove the food.
+    for (var c = 0; c < antpos.length; c += 2) {
+        for (var i = 0; i < foodpos.length; i += 2) {
+            if (antpos[c] + BUG_WIDTH > foodpos[i]
+                && antpos[c] < foodpos[i] + FOOD_WIDTH
+                && antpos[c + 1] + BUG_HIGHT > foodpos[i + 1]
+                && antpos[c + 1] < foodpos[i + 1] + FOOD_HIGHT) {
+                foodpos.splice(i, 2);
+            }
+        }
+    }
+
+    //draw the food items.
+    for (var m = 0; m < foodpos.length; m += 2) {
+        // Draw the ant image
+        var img = new Image();
+        img.src = FOOD_IMG;
+        img.width = FOOD_WIDTH;
+        img.height = FOOD_HIGHT;
+        ctx.drawImage(img, foodpos[m], foodpos[m + 1]);
+    }
+}
+
+/**
  * Sets a single food onto a random position within the bounds
  * of the spawn limits and width/height
  * @returns {food} 
@@ -233,34 +276,6 @@ function setFood() {
     foodpos.push(randx);
     foodpos.push(randy);
     //---- Food can currently overlap!!
-}
-
-/**
- * Create an array of the position of the foods.
- * Create the food items.
- */
-function updateFood() {
-    //Check if any ants are within the perimeter of the food.
-    //if so then remove the food.
-    for (var c = 0; c < antpos.length; c += 2) {
-        for (var i = 0; i < foodpos.length; i += 2) {
-            if (antpos[c] + BUG_WIDTH > foodpos[i]
-                && antpos[c] < foodpos[i] + FOOD_WIDTH
-                && antpos[c + 1] + BUG_HIGHT > foodpos[i +1]
-                && antpos[c + 1] < foodpos[i + 1] + FOOD_HIGHT) {
-                foodpos.splice(i, 2);
-            }// if
-        } // for
-    } // for
-
-    //draw the food items.
-    var scnt = 0;
-    for (var m = 0; m < foodpos.length; m += 2) {
-        fooditems[scnt] = new Path2D;
-        fooditems[scnt].rect(foodpos[m], foodpos[m + 1], FOOD_WIDTH, FOOD_HIGHT);
-        ctx.stroke(fooditems[scnt]);
-        scnt++;
-    }
 }
 
 /**
@@ -287,7 +302,7 @@ function getDifficulty() {
     if (ran < ORANGE_PROBABILITY + RED_PROBABILITY){
         return 2;
     }
-    if (ran < ORANGE_PROBABILITY + RED_PROBABILITY +BLACK_PROBABILITY) {
+    if (ran < ORANGE_PROBABILITY + RED_PROBABILITY + BLACK_PROBABILITY) {
         return 3;
     }
     return 1;
@@ -361,11 +376,6 @@ function update() {
         acDelta += delta;
     }
     lastUpdateTime = Date.now();
-    //Debug
-    ctx.fillStyle = "black";
-    ctx.fillText("IS PAUSED", 200, 500);
-    ctx.fillText(paused, 200, 560);
-    ctx.fillStyle = "white";
 }
 var timer = setInterval(settimer, 1000);
 var anttime = setInterval(function () { createAnt = true; },ran(1,3)*1000);
