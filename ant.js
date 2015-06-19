@@ -1,7 +1,7 @@
 ﻿/** Constants **/
 var
 WIDTH = 400,
-HEIGHT = 600,
+HEIGHT = 640,
 FOOD_WIDTH = 20,
 FOOD_HIGHT = 20,
 BUG_WIDTH = 10,
@@ -42,7 +42,10 @@ var paused = false;
 var gameover = false;
 var score = 0;
 var fooditems = [];
+var highscore = 0;
 
+
+	
 
 /*Setup the animation frame for each browser
 * set the callback to 60FPS
@@ -60,12 +63,26 @@ window.requestAnimationFrame = (function () {
 })();
 
 function startpage(){
-	document.getElementById('startcenter').style.display = 'none';
+	document.getElementById('titlepage').style.display = 'block';
+	document.getElementById('startCanvas').style.display = 'none';
 	document.getElementById('gameCanvas').style.display = 'none';
+	highscore = +localStorage.getItem("highscore");
+	var high = "High Score: " + highscore;
+	document.getElementById("highscore").innerHTML = high;
+	
 	document.getElementById('startbutton').onclick = function () {
 		this.parentNode.style.display = 'none';
-		document.getElementById('startcenter').style.display = 'block';
+		document.getElementById('startCanvas').style.display = 'block';
 		document.getElementById('gameCanvas').style.display = 'block';
+   		canvas = null;
+		ctx = null;
+		foodpos = [];
+		antpos = [];
+		createAnt = false;
+		paused = false;
+		gameover = false;
+		time = 60;
+		score = 0;
 		onload();
 		};  
 }
@@ -106,8 +123,6 @@ function onload() {
         RED_SPEED = RED_SPEED / LEVEL2_BUFF;
         BLACK_SPEED = BLACK_SPEED / LEVEL2_BUFF;
     }
-
-    fooditems = ["food1", "food2", "food3", "food4", "food5"];
 }
 
 function ifclicked(event) {
@@ -134,18 +149,45 @@ function ifclicked(event) {
             // Add score based on ant level
 		    if (antpos[i + 2] == 1) {
 		        score+=ORANGE_SCORE;
+				//fadeout(ORANGE_IMG, antpos[i], antpos[i+1]);
 		    }
 		    else if (antpos[i + 2] == 2) {
 		        score+=RED_SCORE;
+				//fadeout(RED_IMG, antpos[i], antpos[i+1]);
 		    }
 		    else if (antpos[i + 2] == 3) {
 		        score+=BLACK_SCORE;
+				//fadeout(BLACK_IMG, antpos[i], antpos[i+1]);
 		    }
+			
 			antpos.splice(i, 3);
 		}
 	}
+	
+	
+	//Set the HighScore within LocalStorage
+	highscore = localStorage.getItem("highscore");
+	if (score > highscore) {
+		localStorage.setItem("highscore", score );
+	}		
 }
-
+function fadeout(imgpath, x, y){
+	
+	var img = new Image();
+    img.src = imgPath;
+    img.width = BUG_WIDTH;
+    img.height = BUG_HIGHT;
+    ctx.drawImage(img, x, y);
+	
+	var op = 1;
+	function fade()	{
+		if ( op > 0.1 ) {
+			img.style.opacity = op - 0.3;
+			op -= 0.3;
+			setInterval(fade, 50);			
+		}
+	}
+}
 /**
  * Update the canvas
  */
@@ -178,6 +220,8 @@ function draw() {
 	
     updateFood();
     updateAnts();
+	
+	
 }
 
 /**
@@ -263,6 +307,7 @@ function updateFood() {
         ctx.drawImage(img, foodpos[m], foodpos[m + 1]);
     }
 }
+		
 
 /**
  * Sets a single food onto a random position within the bounds
@@ -320,13 +365,23 @@ function getDistance(antx, anty, foodx, foody) {
     return Math.pow(antx - foodx, 2) + Math.pow(anty - foody, 2);
 }
 
+function gethighscore (){
+	
+	if (document.localstorage) {
+		highscore = parseInt(localStorage["highscore"] || '0', 10);
+	} else {
+		// local storage unavailable, set high score to 0
+		highscore = 0;
+	}	
+	
+}
 
 function newAnt() {
     if (createAnt == true) {
         // Give the ant a random position to spawn
         antpos.push(ran(X_SPAWN_MIN, X_SPAWN_MAX));
         // Give the ant a y position
-        antpos.push(0);
+        antpos.push(35);
         // Give the ant a random difficulty
         antpos.push(getDifficulty())
         createAnt = false;
@@ -367,11 +422,20 @@ function update() {
         if (gameover) {
             // CODE FOR GAMEOVER HERE
         }
+		
+		
         else if (!paused) {
             ctx.clearRect(0, 0, WIDTH, HEIGHT);
             newAnt();
             draw();
         }
+		if (time == 0 || foodpos.length == 0 ){
+			paused = true;
+			startpage();	
+		
+		}
+		
+		
     } else {
         acDelta += delta;
     }
