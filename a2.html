@@ -3,9 +3,15 @@
 <head>
     <title>Ant Game</title>
     <link rel="stylesheet" href="main.css" />
+    <script>
+		var highscore;
+		// retrive high score from browser storage if it exists
+		
+		
+	</script>
 </head>
 <body onload="startpage();">
-    <div id="gamestart" >
+    <div id="titlepage" >
     	<p id="gametitle">Ant Scape</p>
   		<div id="radio-btn">
 	        <label>Level:</label>
@@ -13,10 +19,11 @@
     	 	<input id="radio-two" type="radio"  name="level" value="two"> 2
   		</div>
         	<button id="startbutton" type="button">START</button> 
+            <p id="highscore"></p>
 	</div>
        
     </div>
-    <div id="startcenter" >
+    <div id="startCanvas" >
      <canvas id="gameCanvas" ></canvas>
     </div>
 <script language="javascript" src="ant.js"></script>

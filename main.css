@@ -7,18 +7,18 @@
 	margin-bottom:-150px;
 	
 }
-#gamestart {
+#titlepage {
 	margin:auto;
 	width:400px;
-	height:600px;	
+	height:640px;	
 	border:solid;
 	border-width:1px;
 	
 }
-#startcenter {
+#startCanvas {
 	margin:auto;
 	width:400px;
-	height:600px;	
+	height:640px;	
 	border:solid;
 	border-width:1px;	
 }
@@ -45,6 +45,9 @@
 	margin-top:10px;
 
 }
-#gameCanvas{
+#highscore{
+	margin-top:30px;
+	margin-left:145px;
+	font-size:18px;
 		
 }
