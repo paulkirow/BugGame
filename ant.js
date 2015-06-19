@@ -204,12 +204,6 @@ function updateAnts() {
  * @param {int} index
  */
 function updateAnt(speed, imgPath, index) {
-    // Draw the ant image
-    var img = new Image();
-    img.src = imgPath;
-    img.width = BUG_WIDTH;
-    img.height = BUG_HIGHT;
-    ctx.drawImage(img, antpos[index], antpos[index + 1]);
 
     // Find the closest food to the ant
     var closestFoodIndex;
@@ -223,16 +217,27 @@ function updateAnt(speed, imgPath, index) {
         }
     }
 
-    // Move ant towards the food only if it has a target
-    if (closestFoodIndex !== undefined) {
-        // Normalize
-        var xdist = (foodpos[closestFoodIndex] - antpos[index]) / Math.sqrt(closestFoodDist);
-        var ydist = (foodpos[closestFoodIndex + 1] - antpos[index + 1]) / Math.sqrt(closestFoodDist);
+    // Normalize
+    var xdist = (foodpos[closestFoodIndex] + FOOD_HIGHT / 2 - antpos[index]) / Math.sqrt(closestFoodDist);
+    var ydist = (foodpos[closestFoodIndex + 1] + FOOD_WIDTH / 2 - antpos[index + 1]) / Math.sqrt(closestFoodDist);
 
-        // Update Location
-        antpos[index] += xdist * speed;
-        antpos[index + 1] += ydist * speed;
-    }
+    // Update Location
+    antpos[index] += xdist * speed;
+    antpos[index + 1] += ydist * speed;
+
+    // Draw the ant image
+    var img = new Image();
+    img.src = imgPath;
+    img.width = BUG_WIDTH;
+    img.height = BUG_HIGHT;
+
+    ctx.save();
+    ctx.translate(antpos[index], antpos[index + 1]);
+    //Rotate the image
+    var rotate = Math.atan2((foodpos[closestFoodIndex + 1]+ FOOD_HIGHT / 2) - antpos[index + 1], (foodpos[closestFoodIndex] + FOOD_WIDTH / 2) - antpos[index]) + 3 * Math.PI /2;
+    ctx.rotate(rotate);
+    ctx.drawImage(img, 0, 0);
+    ctx.restore();
 }
 
 /**
@@ -242,7 +247,7 @@ function updateAnt(speed, imgPath, index) {
 function updateFood() {
     //Check if any ants are within the perimeter of the food.
     //if so then remove the food.
-    for (var c = 0; c < antpos.length; c += 2) {
+    for (var c = 0; c < antpos.length; c += 3) {
         for (var i = 0; i < foodpos.length; i += 2) {
             if (antpos[c] + BUG_WIDTH > foodpos[i]
                 && antpos[c] < foodpos[i] + FOOD_WIDTH
