@@ -63,28 +63,70 @@ window.requestAnimationFrame = (function () {
 })();
 
 function startpage(){
+	
+	
+	document.getElementById("gametitle").innerHTML = "Ant Scape"
+	document.getElementById('exitbutton').style.display = 'none';
+	document.getElementById('replaybutton').style.display = 'none';
 	document.getElementById('titlepage').style.display = 'block';
 	document.getElementById('startCanvas').style.display = 'none';
 	document.getElementById('gameCanvas').style.display = 'none';
+	document.getElementById('startbutton').style.display = 'block';
+	document.getElementById('radio-btn').style.display = 'block';
+	document.getElementById('userscore').style.display = 'none';
+	
 	highscore = +localStorage.getItem("highscore");
 	var high = "High Score: " + highscore;
 	document.getElementById("highscore").innerHTML = high;
-	
 	document.getElementById('startbutton').onclick = function () {
 		this.parentNode.style.display = 'none';
 		document.getElementById('startCanvas').style.display = 'block';
 		document.getElementById('gameCanvas').style.display = 'block';
-   		canvas = null;
-		ctx = null;
-		foodpos = [];
-		antpos = [];
-		createAnt = false;
-		paused = false;
-		gameover = false;
-		time = 60;
-		score = 0;
 		onload();
 		};  
+		
+	if (gameover){
+		document.getElementById("gametitle").innerHTML = "Game Over"
+		document.getElementById('exitbutton').style.display = 'block';
+		document.getElementById('replaybutton').style.display = 'block';
+		document.getElementById('titlepage').style.display = 'block';
+		document.getElementById('startCanvas').style.display = 'none';
+		document.getElementById('gameCanvas').style.display = 'none';
+		document.getElementById('radio-btn').style.display = 'none';
+		document.getElementById('startbutton').style.display = 'none';
+		document.getElementById('userscore').style.display = 'block';
+		document.getElementById("userscore").innerHTML = "Your Score: " + score;
+		document.getElementById('replaybutton').onclick = function () {
+			this.parentNode.style.display = 'none';
+			document.getElementById('startCanvas').style.display = 'block';
+			document.getElementById('gameCanvas').style.display = 'block';
+			canvas = null;
+			ctx = null;
+			foodpos = [];
+			antpos = [];
+			createAnt = false;
+			paused = false;
+			gameover = false;
+			time = 60;
+			score = 0;
+			onload();
+		};  
+		document.getElementById('exitbutton').onclick = function () {
+			canvas = null;
+			ctx = null;
+			foodpos = [];
+			antpos = [];
+			createAnt = false;
+			paused = false;
+			gameover = false;
+			time = 60;
+			score = 0;
+			startpage();
+		};  
+	
+		
+		
+	}
 }
 
 //Setup the canvas and the image of the bug
@@ -149,7 +191,7 @@ function ifclicked(event) {
             // Add score based on ant level
 		    if (antpos[i + 2] == 1) {
 		        score+=ORANGE_SCORE;
-				//fadeout(ORANGE_IMG, antpos[i], antpos[i+1]);
+				fadeout(ORANGE_IMG, antpos[i], antpos[i+1]);
 		    }
 		    else if (antpos[i + 2] == 2) {
 		        score+=RED_SCORE;
@@ -430,6 +472,7 @@ function update() {
             draw();
         }
 		if (time == 0 || foodpos.length == 0 ){
+			gameover = true;
 			paused = true;
 			startpage();	
 		

@@ -40,13 +40,36 @@
 	margin-top:30px;
 	margin-left:155px;
 }
+#replaybutton{
+	border:solid;
+	border-width:1px;
+	width:80px;
+	height:40px;
+	margin-top:200px;
+	margin-left:155px;
+}
+#exitbutton{
+	border:solid;
+	border-width:1px;
+	width:80px;
+	height:40px;
+	margin-top:30px;
+	margin-left:155px;
+}
 #starttext{
 	padding-left:15px;
 	margin-top:10px;
 
 }
-#highscore{
+#userscore{
 	margin-top:30px;
+	margin-left:145px;
+	font-size:18px;
+		
+}
+
+#highscore{
+	margin-top:10px;
 	margin-left:145px;
 	font-size:18px;
 		
